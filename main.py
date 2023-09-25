@@ -1,4 +1,5 @@
-from plots import *
+from utils import *
 
 if __name__=="__main__":
-  pass
+  dtr,ltr = load_csv('data/Train.txt')
+  print(dtr)
