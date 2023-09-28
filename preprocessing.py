@@ -1,19 +1,18 @@
 from utils import *
 from numpy import linalg as LA
 
-def PCA(data):
+def PCA(data:np.ndarray) -> np.ndarray:
     C = covariance_matrix(data)
 
     # compute eigenvalues and eigenvectors (eigh sorts them in ascending order)
-    eigenvalues, eigenvectors = LA.eigh(C)
+    _, eigenvectors = LA.eigh(C)
 
     # project data onto eigenvectors
     projected_data = np.dot(eigenvectors.T, data)
 
     return projected_data
 
-def LDA(data, labels):
-    data = center_data(data)
+def LDA(data:np.ndarray, labels:np.ndarray) -> np.ndarray:
     data_mean = mean(data)
     classes = classes_number(labels)
     mean_of_classes = compute_mean_of_classes(data, labels)
@@ -22,14 +21,13 @@ def LDA(data, labels):
 
     for i in range(classes):
         S_b += (labels == i).sum() * np.dot(mean_of_classes[i] - data_mean, (mean_of_classes[i] - data_mean).T)
-        S_w += covariance_matrix(data[:, labels == i])  # corresponds to cov matrix because it is (x_c,i - mu)(x_c,i - mu)^T
-        #  where x_c,i is the centered data of class i so it corresponds to the sum over classes of centered data that is the covariance matrix
+        S_w += np.dot(data[:, labels == i] - mean_of_classes[i], (data[:, labels == i] - mean_of_classes[i]).T)
 
-    S_b /= classes
-    S_w /= classes
+    S_b /= data.shape[1]
+    S_w /= data.shape[1]
 
     # compute eigenvalues and eigenvectors (eigh sorts them in ascending order)
-    eigenvalues, eigenvectors = LA.eigh(np.dot(LA.inv(S_w), S_b))
+    _, eigenvectors = LA.eigh(np.dot(LA.inv(S_w), S_b))
     W = eigenvectors[:, ::-1][:, 0:classes - 1]
 
     # project data onto eigenvectors
