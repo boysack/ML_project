@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import os
 
 def generate_and_save_features_hists(samples, labels, pathname='./'):
-  r=[samples.min(), samples.max()]
+  r=(samples.min(), samples.max())
   b=round((samples.max()-samples.min())/0.04)
   for i in range(samples.shape[0]):
     plt.hist(samples[i, labels==0], range=r, bins=b, alpha=0.5, color='red', label='F', density=True)
@@ -34,3 +34,6 @@ def generate_and_save_features_scatter_plots(samples, labels, pathname='./'):
         index_j = str(j)
       plt.savefig(pathname + 'features' + index_i + 'x' + index_j + '_scatter')
       plt.clf()
+
+def pca_explained_variance(data, labels):
+  pass
