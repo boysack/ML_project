@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import os
+import numpy as np
+import scipy as sp
 
 def generate_and_save_features_hists(samples, labels, pathname='./'):
   r=(samples.min(), samples.max())
@@ -37,3 +39,20 @@ def generate_and_save_features_scatter_plots(samples, labels, pathname='./'):
 
 def pca_explained_variance(data, labels):
   pass
+
+def heatmap_creation(data):
+  heatmap = np.zeros((data.shape[0], data.shape[0]))
+  for i in range(data.shape[0]):
+    for j in range(data.shape[1]):
+      if j <= i:
+        heatmap[i][j] = abs(sp.stats.pearsonr(data[i, :], data[j, :])[0])
+        heatmap[j][i] = heatmap[i][j]
+
+  heatmap_plot = plt.imshow(heatmap, cmap='gray_r')
+  plt.colorbar(heatmap_plot)
+  plt.xticks(np.arange(0, data.shape[0]), np.arange(1, data.shape[0] + 1))
+  plt.yticks(np.arange(0, data.shape[0]), np.arange(1, data.shape[0] + 1))
+  plt.tick_params(axis='x', which='both', bottom=False, top=True, labelbottom=False, labeltop=True)
+  # plt.show()
+  plt.title('Pearson correlation coefficient for the dataset features', pad=20)
+  plt.show()
