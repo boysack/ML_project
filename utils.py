@@ -13,9 +13,9 @@ def load_csv(file_name: str) -> tuple:
 
 def z_normalization(x, mean=None, var=None) -> np.ndarray:
   centered_data = center_data(x, mean)
-  if(not var):
+  if(var is None):
     var = variance(x)
-  return (center_data)/var
+  return (centered_data)/var
 
 def v_col(x: np.ndarray) -> np.ndarray:
   return x.reshape((x.size, 1))
@@ -29,10 +29,10 @@ def mean(data: np.ndarray) -> np.ndarray:
 def variance(data: np.ndarray) -> np.ndarray:
   return v_col(data.var(1))
 
-def center_data(data: np.ndarray, mean:np.ndarray=None) -> np.ndarray:
-  if(mean==None):
-    mean=mean(data)
-  return data - mean
+def center_data(data: np.ndarray, mu = None) -> np.ndarray:
+  if(mu is None):
+    mu = mean(data)
+  return data - mu
 
 def covariance_matrix(data: np.ndarray) -> np.ndarray:
   centered_data = center_data(data)
