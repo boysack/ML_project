@@ -18,4 +18,12 @@ def z_normalization(samples, mean=None, var=None) -> tuple:
     var = samples.var(axis=1).reshape(samples.shape[0],1)
   return (samples-mean)/var
 
+def v_col(x: np.ndarray) -> np.ndarray:
+    return x.reshape((x.size, 1))
+
+
+def v_row(x: np.ndarray) -> np.ndarray:
+    return x.reshape((1, x.size))
+
+
   
