@@ -1,3 +1,6 @@
 .DS_Store
 __pycache__/*
 plots/*
+iris.csv
+IRIS_LDA_matrix_m2.npy 
+IRIS_PCA_matrix_m4.npy
