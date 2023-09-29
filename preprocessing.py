@@ -3,71 +3,68 @@ from abc import abstractmethod
 import scipy as sp
 
 class prepocess:
-    def __init__(self, data, m_control_value:int, m:int) -> None:
-        if(m>m_control_value):
-            self.m = m_control_value
-        else:
-            self.m = m
-        self.data = data
+    def __init__(self, data) -> None:
+        self.original_data = data
+        self.m = None
+        self.projected_data = None
         self.eigenvalues = None
         self.eigenvectors = None
         self.is_preprocessed = False
+
+    @abstractmethod
+    def compute_directions(self):
+        pass
 
     @abstractmethod
     def process(self):
         pass
 
 class pca(prepocess):
-    def __init__(self, data, m:int=1) -> None:
-        super().__init__(data, data.shape[0], m)
+    def __init__(self, data) -> None:
+        super().__init__(data)
 
-    def process(self):
-        C = covariance_matrix(self.data)
+    def compute_directions(self):
+        C = covariance_matrix(self.original_data)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(C)
         self.eigenvalues = self.eigenvalues[::-1]
         self.eigenvectors = self.eigenvectors[:,::-1]
-        self.data = np.dot(self.eigenvectors.T, self.data)
-        self.is_preprocessed = True
 
+    def process(self, m:int=1):
+        if(self.eigenvectors is None):
+            self.compute_directions()
+        if(self.m is None or self.m != m):
+            control_value = self.original_data.shape[0]
+            if(m<1 and m>control_value):
+                self.m = 1
+            self.projected_data = np.dot(self.eigenvectors.T, self.original_data)
+            self.is_preprocessed = True
+
+#binary lda - m = 1
 class lda(prepocess):
-    def __init__(self, data, labels, m:int=-1) -> None:
-        self.classes = np.unique(labels).size - 1
-        super().__init__(data, self.classes, m)
+    def __init__(self, data, labels) -> None:
+        super().__init__(data)
         self.labels = labels
-        
+        self.m = 1
+
     def compute_directions(self):
-        print("Computing directions...")
-        data_mean = mean(self.data)
+        data_mean = mean(self.original_data)
         classes = classes_number(self.labels)
-        mean_of_classes = compute_mean_of_classes(self.data, self.labels)
-        S_b = np.zeros((self.data.shape[0], self.data.shape[0]))
-        S_w = np.zeros((self.data.shape[0], self.data.shape[0]))
+        mean_of_classes = compute_mean_of_classes(self.original_data, self.labels)
+        S_b = np.zeros((self.original_data.shape[0], self.original_data.shape[0]))
+        S_w = np.zeros((self.original_data.shape[0], self.original_data.shape[0]))
         for i in range(classes):
             S_b += (self.labels == i).sum() * np.dot(mean_of_classes[i] - data_mean, (mean_of_classes[i] - data_mean).T)
-            S_w += np.dot(self.data[:, self.labels == i] - mean_of_classes[i], (self.data[:, self.labels == i] - mean_of_classes[i]).T)
-        S_b /= self.data.shape[1]
-        S_w /= self.data.shape[1]
+            S_w += np.dot(self.original_data[:, self.labels == i] - mean_of_classes[i], (self.original_data[:, self.labels == i] - mean_of_classes[i]).T)
+        S_b /= self.original_data.shape[1]
+        S_w /= self.original_data.shape[1]
 
         # compute eigenvalues and eigenvectors (eigh sorts them in ascending order)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(S_b, S_w)
         self.eigenvalues = self.eigenvalues[::-1]
         self.eigenvectors = self.eigenvectors[:,::-1]
-        self.is_preprocessed = True
 
-        self.process(self.m)
-
-
-    def process(self, m:int=-1):
-        if m > 0 and m < self.classes:  # if m is not set or it is set to <= 0, use the default value (1)
-            if m != self.m:
-                # set the new m
-                self.m = m
-
-                # compute the new projections
-                W = self.eigenvectors[:, 0:self.m]
-                self.data = np.dot(W.T, self.data)
-        else:
-            self.m = 1
-
-        if self.is_preprocessed is False:
+    def process(self):
+        if(self.eigenvectors is None):
             self.compute_directions()
+        self.projected_data = np.dot(self.eigenvectors.T, self.original_data)
+        self.is_preprocessed = True
