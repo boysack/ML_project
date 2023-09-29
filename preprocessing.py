@@ -30,11 +30,13 @@ class pca(prepocess):
         self.is_preprocessed = True
 
 class lda(prepocess):
-    def __init__(self, data, labels, m:int=1) -> None:
-        super().__init__(data, np.unique(labels).size-1, m)
+    def __init__(self, data, labels, m:int=-1) -> None:
+        self.classes = np.unique(labels).size - 1
+        super().__init__(data, self.classes, m)
         self.labels = labels
-
-    def process(self):
+        
+    def compute_directions(self):
+        print("Computing directions...")
         data_mean = mean(self.data)
         classes = classes_number(self.labels)
         mean_of_classes = compute_mean_of_classes(self.data, self.labels)
@@ -50,7 +52,22 @@ class lda(prepocess):
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(S_b, S_w)
         self.eigenvalues = self.eigenvalues[::-1]
         self.eigenvectors = self.eigenvectors[:,::-1]
-        W = self.eigenvectors[:, 0:self.m]
-        # project data onto eigenvectors
-        self.data = np.dot(W.T, self.data)
         self.is_preprocessed = True
+
+        self.process(self.m)
+
+
+    def process(self, m:int=-1):
+        if m > 0 and m < self.classes:  # if m is not set or it is set to <= 0, use the default value (1)
+            if m != self.m:
+                # set the new m
+                self.m = m
+
+                # compute the new projections
+                W = self.eigenvectors[:, 0:self.m]
+                self.data = np.dot(W.T, self.data)
+        else:
+            self.m = 1
+
+        if self.is_preprocessed is False:
+            self.compute_directions()

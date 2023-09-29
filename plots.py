@@ -5,12 +5,19 @@ import scipy as sp
 from utils import *
 from preprocessing import *
 
+# Definition of a dictionary to map values to color maps
+heatmap_colors = {
+  -1: 'gray_r',
+  0: 'Reds',
+  1: 'Blues'
+}
+
 def generate_and_save_features_hists(samples, labels, pathname='./'):
   r=(samples.min(), samples.max())
   b=round((samples.max()-samples.min())/0.04)
   for i in range(samples.shape[0]):
-    plt.hist(samples[i, labels==0], range=r, bins=b, alpha=0.5, color='red', label='F', density=True)
-    plt.hist(samples[i, labels==1], range=r, bins=b, alpha=0.5, color='blue', label='T', density=True)
+    plt.hist(samples[i, labels==0], range=r, bins=b, alpha=0.5, color='red', label='male (0)', density=True)
+    plt.hist(samples[i, labels==1], range=r, bins=b, alpha=0.5, color='blue', label='female (1)', density=True)
     plt.legend(loc='upper right')
     if(i<10):
       index = '0' + str(i)
@@ -54,7 +61,7 @@ def pca_explained_variance(pca:pca) -> None:
   plt.clf()
 
 
-def heatmap_creation(data: np.ndarray) -> None:
+def heatmap_creation(data: np.ndarray, color: int = -1) -> None:
   heatmap = np.zeros((data.shape[0], data.shape[0]))
   for i in range(data.shape[0]):
     for j in range(data.shape[1]):
@@ -62,18 +69,25 @@ def heatmap_creation(data: np.ndarray) -> None:
         heatmap[i][j] = abs(sp.stats.pearsonr(data[i, :], data[j, :])[0])
         heatmap[j][i] = heatmap[i][j]
 
-  heatmap_plot = plt.imshow(heatmap, cmap='gray_r')
+  heatmap_plot = plt.imshow(heatmap, cmap=heatmap_colors[color])
   plt.colorbar(heatmap_plot)
   plt.xticks(np.arange(0, data.shape[0]), np.arange(1, data.shape[0] + 1))
   plt.yticks(np.arange(0, data.shape[0]), np.arange(1, data.shape[0] + 1))
   plt.tick_params(axis='x', which='both', bottom=False, top=True, labelbottom=False, labeltop=True)
-  plt.show()
-  plt.title('Pearson correlation coefficient for the dataset features', pad=20)
-  plt.show()
+  
+  # plt.show()
+  if color == -1:
+    plt.title('Heatmap for the whole dataset', pad=20)
+    plt.savefig('./plots/heatmaps/heatmap')
+  else:
+    # male = 0 female = 1
+    plt.title('Heatmap for class ' + str(color), pad=20)
+    plt.savefig('./plots/heatmaps/heatmap_class_' + str(color))
+  plt.clf()
 
 def heatmaps(data: np.ndarray, labels: np.ndarray) -> None:
   for i in range(classes_number(labels)):
-    heatmap_creation(data[:, labels == i])
+    heatmap_creation(data[:, labels == i], i)
 
   heatmap_creation(data)
 
@@ -81,7 +95,8 @@ def lda_direction_histogram(lda: lda) -> None:
   if lda.is_preprocessed is False:
      lda.process()
   for i in range(lda.data.shape[0]):
-    plt.hist(lda.data[i, lda.labels==0], bins=50, color='red', label='F', density=True, alpha=0.5)
-    plt.hist(lda.data[i, lda.labels==1], bins=50, color='blue', label='T', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==0], bins=50, color='red', label='male (0)', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==1], bins=50, color='blue', label='female (1)', density=True, alpha=0.5)
+    plt.legend(loc='upper right')
     plt.savefig('./plots/lda/lda_plot')
     plt.clf()
