@@ -26,8 +26,11 @@ class pca(prepocess):
     def compute_directions(self):
         C = covariance_matrix(self.original_data)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(C)
+        # invert order
         self.eigenvalues = self.eigenvalues[::-1]
-        self.eigenvectors = self.eigenvectors[:,::-1]
+        self.eigenvectors = self.eigenvectors[::-1]
+        # print("eigenvectors: ", self.eigenvalues.shape)
+        # self.eigenvectors = self.eigenvectors[:self.m]
 
     def process(self, m:int=1):
         if(self.eigenvectors is None):
@@ -36,7 +39,7 @@ class pca(prepocess):
             control_value = self.original_data.shape[0]
             if(m<1 and m>control_value):
                 self.m = 1
-            self.projected_data = np.dot(self.eigenvectors.T, self.original_data)
+            self.projected_data = np.dot(self.eigenvectors[:, :self.m].T, self.original_data)
             self.is_preprocessed = True
 
 #binary lda - m = 1
@@ -60,11 +63,13 @@ class lda(prepocess):
 
         # compute eigenvalues and eigenvectors (eigh sorts them in ascending order)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(S_b, S_w)
+        # invert order
         self.eigenvalues = self.eigenvalues[::-1]
-        self.eigenvectors = self.eigenvectors[:,::-1]
+        self.eigenvectors = self.eigenvectors[:, ::-1]
 
     def process(self):
         if(self.eigenvectors is None):
             self.compute_directions()
-        self.projected_data = np.dot(self.eigenvectors.T, self.original_data)
+        self.projected_data = np.dot(self.eigenvectors[:, 0:self.m].T, self.original_data)
+        print(self.projected_data.shape)
         self.is_preprocessed = True

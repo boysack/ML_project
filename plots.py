@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import os
 import numpy as np
 import scipy as sp
 from utils import *
@@ -12,7 +11,7 @@ heatmap_colors = {
   1: 'Reds'
 }
 
-def generate_and_save_features_hists(samples, labels, pathname='./'):
+def generate_and_save_features_hists(samples, labels, pathname='./plots/scatter_plots/'):
   r=(samples.min(), samples.max())
   b=round((samples.max()-samples.min())/0.04)
   for i in range(samples.shape[0]):
@@ -26,7 +25,7 @@ def generate_and_save_features_hists(samples, labels, pathname='./'):
     plt.savefig(pathname + 'feature' + index + '_hist')
     plt.clf()
 
-def generate_and_save_features_scatter_plots(samples, labels, pathname='./'):
+def generate_and_save_features_scatter_plots(samples, labels, pathname='./plots/scatter_plots/'):
   for i in range(samples.shape[0]):
     for j in range(samples.shape[0]):
       if i==j:
@@ -52,7 +51,7 @@ def pca_explained_variance(pca:pca) -> None:
     pca.process()
 
   pca_explained_variance_ratio = np.cumsum(pca.eigenvalues) / np.sum(pca.eigenvalues)
-  plt.plot(np.arange(1, pca.data.shape[0] + 1), pca_explained_variance_ratio, 'o-')
+  plt.plot(np.arange(1, pca.original_data.shape[0] + 1), pca_explained_variance_ratio, 'o-')
   plt.xlabel('PCA dimensions')
   plt.ylabel('Fraction of explained variance')
   plt.grid()
@@ -94,9 +93,10 @@ def heatmaps(data: np.ndarray, labels: np.ndarray) -> None:
 def lda_direction_histogram(lda: lda) -> None:
   if lda.is_preprocessed is False:
      lda.process()
-  for i in range(lda.data.shape[0]):
-    plt.hist(lda.data[i, lda.labels==0], bins=50, color='blue', label='male (0)', density=True, alpha=0.5)
-    plt.hist(lda.data[i, lda.labels==1], bins=50, color='red', label='female (1)', density=True, alpha=0.5)
+  for i in range(lda.projected_data.shape[0]):
+    plt.hist(lda.projected_data[i, lda.labels==0], bins=50, color='blue', label='male (0)', density=True, alpha=0.5)
+    plt.hist(lda.projected_data[i, lda.labels==1], bins=50, color='red', label='female (1)', density=True, alpha=0.5)
     plt.legend(loc='upper right')
     plt.savefig('./plots/lda/lda_plot')
     plt.clf()
+    
