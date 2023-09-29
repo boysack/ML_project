@@ -41,6 +41,6 @@ def covariance_matrix(data: np.ndarray) -> np.ndarray:
 def classes_number(labels: np.ndarray):
   return np.unique(labels).size
 
-def compute_mean_of_classes(data: np.ndarray, labels: np.ndarray) -> np.ndarray:
+def compute_mean_of_classes(data: np.ndarray, labels: np.ndarray) -> list:
   means = [mean(data[:, labels==i]) for i in np.unique(labels)]
-  return np.hstack(means)
+  return means
