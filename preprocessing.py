@@ -24,8 +24,8 @@ class pca(prepocess):
     def process(self):
         C = covariance_matrix(self.data)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(C)
-        self.eigenvalues = self.eigenvalues[:,::-1]
-        self.eigenvectors = self.eigenvectors[::-1]
+        self.eigenvalues = self.eigenvalues[::-1]
+        self.eigenvectors = self.eigenvectors[:,::-1]
         self.data = np.dot(self.eigenvectors.T, self.data)
         self.is_preprocessed = True
 

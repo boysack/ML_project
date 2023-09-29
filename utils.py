@@ -44,3 +44,10 @@ def classes_number(labels: np.ndarray):
 def compute_mean_of_classes(data: np.ndarray, labels: np.ndarray) -> list:
   means = [mean(data[:, labels==i]) for i in np.unique(labels)]
   return means
+
+def k_fold(data: np.ndarray, labels:np.ndarray, K:int = 5, seed:int = 69):
+  np.random.seed(seed)
+  shuffled_indexes = np.random.permutation(data.shape[1])
+  data_shuffled = np.hsplit(data[:, shuffled_indexes], K)
+  labels_shuffled = np.hsplit(labels[shuffled_indexes], K)
+  return data_shuffled, labels_shuffled
