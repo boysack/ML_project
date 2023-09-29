@@ -1,5 +1,6 @@
 from utils import *
 from numpy import linalg as LA
+import scipy as sp
 
 def PCA(data:np.ndarray) -> np.ndarray:
     C = covariance_matrix(data)
@@ -27,7 +28,9 @@ def LDA(data:np.ndarray, labels:np.ndarray) -> np.ndarray:
     S_w /= data.shape[1]
 
     # compute eigenvalues and eigenvectors (eigh sorts them in ascending order)
-    _, eigenvectors = LA.eigh(np.dot(LA.inv(S_w), S_b))
+    # _, eigenvectors = LA.eigh(np.dot(LA.inv(S_w), S_b))
+    _, eigenvectors = sp.linalg.eigh(S_b, S_w)
+    # _, eigenvectors = LA.eigh(S_b, S_w)
     W = eigenvectors[:, ::-1][:, 0:classes - 1]
 
     # project data onto eigenvectors
