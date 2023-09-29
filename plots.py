@@ -40,8 +40,19 @@ def generate_and_save_features_scatter_plots(samples, labels, pathname='./'):
       plt.savefig(pathname + 'features' + index_i + 'x' + index_j + '_scatter')
       plt.clf()
 
-def pca_explained_variance(data, labels):
-  pass
+def pca_explained_variance(pca:pca) -> None:
+  if pca.is_preprocessed is False:
+    pca.process()
+
+  pca_explained_variance_ratio = np.cumsum(pca.eigenvalues) / np.sum(pca.eigenvalues)
+  plt.plot(np.arange(1, pca.data.shape[0] + 1), pca_explained_variance_ratio, 'o-')
+  plt.xlabel('PCA dimensions')
+  plt.ylabel('Fraction of explained variance')
+  plt.grid()
+  plt.title('PCA explained variance')
+  plt.savefig('./plots/pca_explained_variance/pca_explained_variance')
+  plt.clf()
+
 
 def heatmap_creation(data: np.ndarray) -> None:
   heatmap = np.zeros((data.shape[0], data.shape[0]))
@@ -56,7 +67,7 @@ def heatmap_creation(data: np.ndarray) -> None:
   plt.xticks(np.arange(0, data.shape[0]), np.arange(1, data.shape[0] + 1))
   plt.yticks(np.arange(0, data.shape[0]), np.arange(1, data.shape[0] + 1))
   plt.tick_params(axis='x', which='both', bottom=False, top=True, labelbottom=False, labeltop=True)
-  # plt.show()
+  plt.show()
   plt.title('Pearson correlation coefficient for the dataset features', pad=20)
   plt.show()
 
@@ -66,10 +77,11 @@ def heatmaps(data: np.ndarray, labels: np.ndarray) -> None:
 
   heatmap_creation(data)
 
-def lda_direction_histogram(data: np.ndarray, labels: np.ndarray, lda: lda) -> None:
+def lda_direction_histogram(lda: lda) -> None:
   if lda.is_preprocessed is False:
      lda.process()
-  for i in range(data.shape[0]):
-    plt.hist(lda.data[i, labels==0], bins=200, color='red', label='F', density=True)
-    plt.hist(lda.data[i, labels==1], bins=200, color='blue', label='T', density=True)
-    plt.show()
+  for i in range(lda.data.shape[0]):
+    plt.hist(lda.data[i, lda.labels==0], bins=200, color='red', label='F', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==1], bins=200, color='blue', label='T', density=True, alpha=0.5)
+    plt.savefig('./plots/lda/lda_plot')
+    plt.clf()

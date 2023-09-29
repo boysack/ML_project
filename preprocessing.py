@@ -24,7 +24,7 @@ class pca(prepocess):
     def process(self):
         C = covariance_matrix(self.data)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(C)
-        self.eigenvalues = self.eigenvalues[:,::-1]
+        self.eigenvalues = self.eigenvalues[::-1]
         self.eigenvectors = self.eigenvectors[:,::-1]
         self.data = np.dot(self.eigenvectors.T, self.data)
         self.is_preprocessed = True
@@ -48,7 +48,7 @@ class lda(prepocess):
 
         # compute eigenvalues and eigenvectors (eigh sorts them in ascending order)
         self.eigenvalues, self.eigenvectors = sp.linalg.eigh(S_b, S_w)
-        self.eigenvalues = self.eigenvalues[:,::-1]
+        self.eigenvalues = self.eigenvalues[::-1]
         self.eigenvectors = self.eigenvectors[:,::-1]
         W = self.eigenvectors[:, 0:self.m]
         # project data onto eigenvectors

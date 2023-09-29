@@ -13,8 +13,9 @@ if __name__=="__main__":
   # heatmaps(dtr, ltr)
 
   # plots the Histogram of dataset features - LDA direction
-  lda_direction_histogram(dtr, ltr)
+  lda_direction_histogram(lda(dtr, ltr))
   # generate_and_save_features_hists(LDA(dtr, ltr), ltr, './plots/histograms/lda/')
 
-  t = compute_mean_of_classes(dtr,ltr)
-  print(t)
+  # t = compute_mean_of_classes(dtr,ltr)
+
+  pca_explained_variance(pca(dtr))
