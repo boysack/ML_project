@@ -66,9 +66,10 @@ def heatmaps(data: np.ndarray, labels: np.ndarray) -> None:
 
   heatmap_creation(data)
 
-def lda_direction_histogram(data: np.ndarray, labels: np.ndarray) -> None:
-  projected_data = LDA(data, labels)
+def lda_direction_histogram(data: np.ndarray, labels: np.ndarray, lda: lda) -> None:
+  if lda.is_preprocessed is False:
+     lda.process()
   for i in range(data.shape[0]):
-    plt.hist(projected_data[i, labels==0], bins=200, color='red', label='F', density=True)
-    plt.hist(projected_data[i, labels==1], bins=200, color='blue', label='T', density=True)
+    plt.hist(lda.data[i, labels==0], bins=200, color='red', label='F', density=True)
+    plt.hist(lda.data[i, labels==1], bins=200, color='blue', label='T', density=True)
     plt.show()
