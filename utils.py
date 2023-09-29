@@ -42,8 +42,5 @@ def classes_number(labels: np.ndarray):
   return np.unique(labels).size
 
 def compute_mean_of_classes(data: np.ndarray, labels: np.ndarray) -> np.ndarray:
-  classes = classes_number(labels)
-  mean_of_classes = np.zeros((data.shape[0], classes))
-  for i in range(classes):
-      mean_of_classes[:, i] = mean(data[:, labels == i])
-  return mean_of_classes
+  means = [mean(data[:, labels==i]) for i in np.unique(labels)]
+  return np.hstack(means)
