@@ -8,24 +8,23 @@ from preprocessing import *
 # Definition of a dictionary to map values to color maps
 heatmap_colors = {
   -1: 'gray_r',
-  0: 'Reds',
-  1: 'Blues'
+  0: 'Blues',
+  1: 'Reds'
 }
 
 def generate_and_save_features_hists(samples, labels, pathname='./'):
   r=(samples.min(), samples.max())
   b=round((samples.max()-samples.min())/0.04)
   for i in range(samples.shape[0]):
-    plt.hist(samples[i, labels==0], range=r, bins=b, alpha=0.5, color='red', label='male (0)', density=True)
-    plt.hist(samples[i, labels==1], range=r, bins=b, alpha=0.5, color='blue', label='female (1)', density=True)
+    plt.hist(samples[i, labels==0], range=r, bins=50, alpha=0.5, color='red', label='male (0)', density=True)
+    plt.hist(samples[i, labels==1], range=r, bins=50, alpha=0.5, color='blue', label='female (1)', density=True)
     plt.legend(loc='upper right')
     if(i<10):
       index = '0' + str(i)
     else:
       index = str(i)
-    # plt.savefig(pathname + 'feature' + index + '_hist')
+    plt.savefig(pathname + 'feature' + index + '_hist')
     plt.clf()
-    plt.show()
 
 def generate_and_save_features_scatter_plots(samples, labels, pathname='./'):
   for i in range(samples.shape[0]):
@@ -34,8 +33,9 @@ def generate_and_save_features_scatter_plots(samples, labels, pathname='./'):
         continue
       plt.xlim(samples.min()-0.2, samples.max()+0.2)
       plt.ylim(samples.min()-0.2, samples.max()+0.2)
-      plt.scatter(samples[i, labels==0], samples[j, labels==0], alpha=0.5, color='red', label='F')
-      plt.scatter(samples[i, labels==1], samples[j, labels==1], alpha=0.5, color='blue', label='T')
+      plt.scatter(samples[i, labels==0], samples[j, labels==0], alpha=0.3, color='blue', label='male (0)')
+      plt.scatter(samples[i, labels==1], samples[j, labels==1], alpha=0.3, color='red', label='female (1)')
+      plt.legend(loc='upper right')
       if(i<10):
         index_i = '0' + str(i)
       else:
@@ -95,8 +95,8 @@ def lda_direction_histogram(lda: lda) -> None:
   if lda.is_preprocessed is False:
      lda.process()
   for i in range(lda.data.shape[0]):
-    plt.hist(lda.data[i, lda.labels==0], bins=50, color='red', label='male (0)', density=True, alpha=0.5)
-    plt.hist(lda.data[i, lda.labels==1], bins=50, color='blue', label='female (1)', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==0], bins=50, color='blue', label='male (0)', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==1], bins=50, color='red', label='female (1)', density=True, alpha=0.5)
     plt.legend(loc='upper right')
     plt.savefig('./plots/lda/lda_plot')
     plt.clf()
