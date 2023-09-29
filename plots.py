@@ -81,7 +81,7 @@ def lda_direction_histogram(lda: lda) -> None:
   if lda.is_preprocessed is False:
      lda.process()
   for i in range(lda.data.shape[0]):
-    plt.hist(lda.data[i, lda.labels==0], bins=200, color='red', label='F', density=True, alpha=0.5)
-    plt.hist(lda.data[i, lda.labels==1], bins=200, color='blue', label='T', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==0], bins=50, color='red', label='F', density=True, alpha=0.5)
+    plt.hist(lda.data[i, lda.labels==1], bins=50, color='blue', label='T', density=True, alpha=0.5)
     plt.savefig('./plots/lda/lda_plot')
     plt.clf()
