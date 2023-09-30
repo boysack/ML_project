@@ -57,14 +57,26 @@ if __name__=="__main__":
   print("Computing MVG...")
   MVG = mvg(dtr, ltr)
   MVG.fit()
+  result_MVG = MVG.predict(dtr)
+  print("result_MVG: ", result_MVG)
+
+  print("#############################################")
 
   print("Computing NBG...")
   NBG = naiveg(dtr, ltr)
   NBG.fit()
+  result_NBG = NBG.predict(dtr)
+  print("result_NBG: ", result_NBG)
+
+  print("#############################################")
 
   print("Computing TIEDG...")
   TIEDG = tiedg(dtr, ltr)
   TIEDG.fit()
+  result_TIEDG = TIEDG.predict(dtr)
+  print("result_TIEDG: ", result_TIEDG)
+
+  print("#############################################")
 
   # mean_f1 = dtr[0, :].mean()
   # print("mean_f1: ", mean_f1)
