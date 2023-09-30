@@ -46,7 +46,7 @@ def compute_mean_of_classes(data: np.ndarray, labels: np.ndarray) -> list:
   return means
 
 def compute_covariance_of_classes(data: np.ndarray, labels: np.ndarray) -> list:
-  covariances = [covariance_matrix(data[:, labels==i] for i in np.unique(labels))]
+  covariances = [covariance_matrix(data[:, labels==i]) for i in np.unique(labels)]
   return covariances
 
 def k_fold(data: np.ndarray, labels:np.ndarray, K:int = 5, seed:int = 69):
