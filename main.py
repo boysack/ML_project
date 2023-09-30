@@ -36,8 +36,11 @@ if __name__=="__main__":
 
   print("#############################################")
 
-  print("mean_of_classes - length: (", str(len(compute_mean_of_classes(dtr, ltr)[0])) + ", " + str(len(compute_mean_of_classes(dtr, ltr)[1])) + " )")
-  print("covariance_of_classes - shape: (", str(compute_covariance_of_classes(dtr, ltr)[0].shape) + ", " + str(compute_covariance_of_classes(dtr, ltr)[1].shape) + " )")
+  # print("mean_of_classes - length: (", str(len(compute_mean_of_classes(dtr, ltr)[0])) + ", " + str(len(compute_mean_of_classes(dtr, ltr)[1])) + " )")
+  # print("covariance_of_classes - shape: (", str(compute_covariance_of_classes(dtr, ltr)[0].shape) + ", " + str(compute_covariance_of_classes(dtr, ltr)[1].shape) + " )")
+
+  # print("mean_of_classes: " + str(compute_mean_of_classes(dtr, ltr)))
+  # print("covariance_of_classes: " + str(compute_covariance_of_classes(dtr, ltr)))
 
   print("#############################################")
 

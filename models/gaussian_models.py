@@ -55,7 +55,7 @@ class naiveg(gaussian):
     self.means = compute_mean_of_classes(self.data, self.labels)
     covariances = compute_covariance_of_classes(self.data, self.labels)
     dim = self.data.shape[0]
-    classes = classes_number
+    classes = classes_number(self.labels)
     self.covariances = [covariances[i] * np.identity(dim) for i in range(classes)]
     self.is_fitted = True
 
@@ -65,7 +65,7 @@ class tiedg(gaussian):
 
   def fit(self):
     self.means = compute_mean_of_classes(self.data, self.labels)
-    self.covariances = covariance_matrix(self.data, self.labels)
+    self.covariances = covariance_matrix(self.data)
 
   def binary_gaussian_score(self, X:np.ndarray):
     lr = np.exp(self.gaussian_log_pdf(X,self.C,self.mu[1])-self.gaussian_log_pdf(X,self.C,self.mu[0]))
