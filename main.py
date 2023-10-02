@@ -4,6 +4,7 @@ from preprocessing import *
 import numpy as np
 from preprocessing import *
 from models.gaussian_models import *
+from models.logistic_regression import *
 
 # def load_csv(file_name: str) -> tuple:
 #   data = []
@@ -77,6 +78,32 @@ if __name__=="__main__":
   print("result_TIEDG: ", result_TIEDG)
 
   print("#############################################")
+
+  print("Computing LR...")
+  LR = logistic_regression(dtr, ltr, 0.1)
+  LR.scores()
+  result_LR = LR.score_values
+  print("result_LR: ", result_LR)
+
+  results_lr = []
+
+  for value in result_LR:
+    if value > 0:
+      results_lr.append(1)
+    else:
+      results_lr.append(0)
+
+  correct = 0
+
+  for result, label in zip(results_lr, ltr):
+    if result == label:
+      correct += 1
+
+  print("number of correct predictions: ", correct, " out of ", len(results_lr), " samples")
+  print("accuracy: ", correct / len(results_lr))
+
+  print("#############################################")
+
 
   # mean_f1 = dtr[0, :].mean()
   # print("mean_f1: ", mean_f1)
