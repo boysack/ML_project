@@ -22,16 +22,16 @@ class gaussian:
   def gaussian_log_pdf(self, X:np.ndarray, C:np.ndarray, mu:np.ndarray):
     inv_C = np.linalg.inv(C)
 
-    c1 = -0.5 * C.size * np.log(2*np.pi)
+    c1 = -0.5 * X.shape[0] * np.log(2*np.pi)
     logdet = -0.5 * np.linalg.slogdet(C)[1]
     s = -0.5 * ((X - mu) * np.dot(inv_C, (X - mu))).sum(0)
 
     return c1 + logdet + s
 
   def binary_gaussian_score(self, X:np.ndarray):
-    gaussian_log_pdf_1 = self.gaussian_log_pdf(X, self.covariances[1], self.means[1])
-    gaussian_log_pdf_0 = self.gaussian_log_pdf(X, self.covariances[0], self.means[0])
-    lr = np.exp(gaussian_log_pdf_1 - gaussian_log_pdf_0)
+    gaussian_log_pdf_1 = self.gaussian_log_pdf(X, self.covariances, self.means[1])
+    gaussian_log_pdf_0 = self.gaussian_log_pdf(X, self.covariances, self.means[0])
+    lr = gaussian_log_pdf_1 - gaussian_log_pdf_0
     return lr
   
   def predict(self, X:np.ndarray):
@@ -67,10 +67,35 @@ class tiedg(gaussian):
 
   def fit(self):
     self.means = compute_mean_of_classes(self.data, self.labels)
-    self.covariances = covariance_matrix(self.data)
+    C = compute_covariance_of_classes(self.data, self.labels)
+    self.covariances = 0
+    for i in range(classes_number(self.labels)):
+      self.covariances += (self.labels==i).sum() * C[i]
+    self.covariances /= self.labels.size
+    self.is_fitted = True
 
   def binary_gaussian_score(self, X:np.ndarray):
     gaussian_log_pdf_1 = self.gaussian_log_pdf(X, self.covariances, self.means[1])
     gaussian_log_pdf_0 = self.gaussian_log_pdf(X, self.covariances, self.means[0])
-    lr = np.exp(gaussian_log_pdf_1 - gaussian_log_pdf_0)
+    lr = gaussian_log_pdf_1 - gaussian_log_pdf_0
+    return lr
+  
+class naivetiedg(gaussian):
+  def __init__(self, data:np.ndarray, labels:np.ndarray):
+    super().__init__(data, labels)
+
+  def fit(self):
+    self.means = compute_mean_of_classes(self.data, self.labels)
+    C = compute_covariance_of_classes(self.data, self.labels)
+    self.covariances = 0
+    for i in range(classes_number(self.labels)):
+      self.covariances += (self.labels==i).sum() * C[i]
+    self.covariances /= self.labels.size
+    self.covariances *= np.identity(self.data.shape[0])
+    self.is_fitted = True
+
+  def binary_gaussian_score(self, X:np.ndarray):
+    gaussian_log_pdf_1 = self.gaussian_log_pdf(X, self.covariances, self.means[1])
+    gaussian_log_pdf_0 = self.gaussian_log_pdf(X, self.covariances, self.means[0])
+    lr = gaussian_log_pdf_1 - gaussian_log_pdf_0
     return lr
