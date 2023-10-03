@@ -18,7 +18,7 @@ class gaussian:
   def gaussian_log_pdf(self, X:np.ndarray, C:np.ndarray, mu:np.ndarray):
     inv_C = np.linalg.inv(C)
 
-    c1 = -0.5 * C.shape[0] * np.log(2*np.pi)
+    c1 = -0.5 * C.size * np.log(2*np.pi)
     logdet = -0.5 * np.linalg.slogdet(C)[1]
     s = -0.5 * ((X - mu) * np.dot(inv_C, (X - mu))).sum(0)
 
