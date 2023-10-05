@@ -26,11 +26,14 @@ if __name__=="__main__":
 
   start_time_load = time.time()
   dtr,ltr = load_csv('data/Train.txt')
+  dte, lte = load_csv('data/Test.txt')
   end_time_load = time.time()
 
   #TEST Nico
   print("DTR - shape: ", dtr.shape)
   print("LTR - shape: ", ltr.shape)
+  print("DTE - shape: ", dte.shape)
+  print("LTE - shape: ", lte.shape)
 
   print("#############################################")
 
@@ -102,7 +105,7 @@ if __name__=="__main__":
   print("#############################################")
 
   print("Computing LR...")
-  LR = logistic_regression(dtr, ltr, 0.1)
+  LR = logistic_regression(dtr, ltr, dte, 0.1)
 
   start_time_lr = time.time()
   LR.scores()
@@ -121,7 +124,7 @@ if __name__=="__main__":
 
   correct = 0
 
-  for result, label in zip(results_lr, ltr):
+  for result, label in zip(results_lr, lte):
     if result == label:
       correct += 1
 
@@ -131,7 +134,7 @@ if __name__=="__main__":
   print("#############################################")
 
   print("Computing QLR...")
-  QLR = logistic_regression(dtr, ltr, 0.1, True)
+  QLR = logistic_regression(dtr, ltr, dte, 0.1, True)
   
   start_time_qlr = time.time()
   QLR.scores()
@@ -150,7 +153,7 @@ if __name__=="__main__":
 
   correct_qlr = 0
 
-  for result, label in zip(results_qlr, ltr):
+  for result, label in zip(results_qlr, lte):
     if result == label:
       correct_qlr += 1
 

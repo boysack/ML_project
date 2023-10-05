@@ -3,13 +3,14 @@ import numpy as np
 import scipy.optimize as opt
 
 class discriminative_model:
-    def __init__(self, data:np.ndarray, labels:np.ndarray, l:int, quadratic:bool = False) -> None:
+    def __init__(self, data:np.ndarray, labels:np.ndarray, data_test:np.ndarray, l:int, quadratic:bool = False) -> None:
         self.data = data
+        self.data_test = data_test
         self.labels = labels
         self.l = l
         self.weights = None
         self.bias = None
-        # self.score_values = None
+        self.score_values = None
         self.is_fitted = False
         self.is_quadratic = quadratic
 
@@ -22,8 +23,8 @@ class discriminative_model:
         pass
 
 class logistic_regression(discriminative_model):
-    def __init__(self, data:np.ndarray, labels:np.ndarray, l:float = 0.1, quadratic:bool = False) -> None:
-        super().__init__(data, labels, l, quadratic)
+    def __init__(self, data:np.ndarray, labels:np.ndarray, data_test:np.ndarray, l:float = 0.1, quadratic:bool = False) -> None:
+        super().__init__(data, labels, data_test, l, quadratic)
 
     def train(self):
         J = self.logreg_obj_wrap()
@@ -39,14 +40,15 @@ class logistic_regression(discriminative_model):
         # print("b: " + str(self.b))
         self.is_fitted = True
 
-    def scores(self, X:np.ndarray):
+    def scores(self):
         if(self.is_fitted is False):
             if (self.is_quadratic is True):
                 self.quadratic_expansion()
             self.train()
-        # self.score_values = np.dot(self.w.T, X) + self.b
+
+        self.score_values = np.dot(self.w.T, self.data_test) + self.b
         # print("score_values_size : " + str(self.score_values.shape))
-        return np.dot(self.w.T, X) + self.b
+        # return np.dot(self.w.T, X) + self.b
 
     def logreg_obj_wrap(self):
 
@@ -78,6 +80,7 @@ class logistic_regression(discriminative_model):
         # self.data = np.hstack((self.data, self.data**2))
         # self.data = np.vstack((self.data, self.data[0, :]**2))
         self.data = np.vstack((self.data, self.data**2))
+        self.data_test = np.vstack((self.data_test, self.data_test**2))
         # print("data_size after expansion: " + str(self.data[0, :].shape))
         # print("After expansion:" + str(self.data))
         
