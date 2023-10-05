@@ -1,7 +1,6 @@
 from abc import abstractmethod
 import numpy as np
 from utils import *
-from utils import np
 
 class gaussian:
   def __init__(self, data:np.ndarray, labels:np.ndarray):

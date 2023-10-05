@@ -9,7 +9,7 @@ class discriminative_model:
         self.l = l
         self.weights = None
         self.bias = None
-        self.score_values = None
+        # self.score_values = None
         self.is_fitted = False
         self.is_quadratic = quadratic
 
@@ -39,13 +39,14 @@ class logistic_regression(discriminative_model):
         # print("b: " + str(self.b))
         self.is_fitted = True
 
-    def scores(self):
+    def scores(self, X:np.ndarray):
         if(self.is_fitted is False):
             if (self.is_quadratic is True):
                 self.quadratic_expansion()
             self.train()
-        self.score_values = np.dot(self.w.T, self.data) + self.b
+        # self.score_values = np.dot(self.w.T, X) + self.b
         # print("score_values_size : " + str(self.score_values.shape))
+        return np.dot(self.w.T, X) + self.b
 
     def logreg_obj_wrap(self):
 
