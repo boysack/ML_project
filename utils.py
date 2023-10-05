@@ -1,4 +1,3 @@
-
 import numpy as np
 
 def load_csv(file_name: str) -> tuple:
