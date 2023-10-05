@@ -5,6 +5,7 @@ import numpy as np
 from preprocessing import *
 from models.gaussian_models import *
 from models.logistic_regression import *
+import time
 
 # def load_csv(file_name: str) -> tuple:
 #   data = []
@@ -22,7 +23,10 @@ from models.logistic_regression import *
 #   return np.array(data).T, l
 
 if __name__=="__main__":
+
+  start_time_load = time.time()
   dtr,ltr = load_csv('data/Train.txt')
+  end_time_load = time.time()
 
   #TEST Nico
   print("DTR - shape: ", dtr.shape)
@@ -47,17 +51,27 @@ if __name__=="__main__":
 
   print("Computing PCA...")
   PCA = pca(dtr)
+
+  start_time_pca = time.time()
   PCA.process()
+  end_time_pca = time.time()
 
   print("Computing LDA...")
   LDA = lda(dtr, ltr)
+
+  start_time_lda = time.time()
   LDA.process()
+  end_time_lda = time.time()
 
   print("#############################################")
 
   print("Computing MVG...")
   MVG = mvg(dtr, ltr)
+
+  start_time_mvg = time.time()
   MVG.train()
+  end_time_mvg = time.time()
+
   result_MVG = MVG.scores(dtr)
   print("result_MVG: ", result_MVG)
 
@@ -65,7 +79,11 @@ if __name__=="__main__":
 
   print("Computing NBG...")
   NBG = naiveg(dtr, ltr)
+
+  start_time_nbg = time.time()
   NBG.train()
+  end_time_nbg = time.time()
+
   result_NBG = NBG.scores(dtr)
   print("result_NBG: ", result_NBG)
 
@@ -73,7 +91,11 @@ if __name__=="__main__":
 
   print("Computing TIEDG...")
   TIEDG = tiedg(dtr, ltr)
+
+  start_time_tiedg = time.time()
   TIEDG.train()
+  end_time_tiedg = time.time()
+
   result_TIEDG = TIEDG.scores(dtr)
   print("result_TIEDG: ", result_TIEDG)
 
@@ -81,7 +103,11 @@ if __name__=="__main__":
 
   print("Computing LR...")
   LR = logistic_regression(dtr, ltr, 0.1)
+
+  start_time_lr = time.time()
   LR.scores()
+  end_time_lr = time.time()
+
   result_LR = LR.score_values
   print("result_LR: ", result_LR)
 
@@ -104,6 +130,44 @@ if __name__=="__main__":
 
   print("#############################################")
 
+  print("Computing QLR...")
+  QLR = logistic_regression(dtr, ltr, 0.1, True)
+  
+  start_time_qlr = time.time()
+  QLR.scores()
+  end_time_qlr = time.time()
+
+  result_QLR = QLR.score_values
+  print("result_QLR: ", result_QLR)
+
+  results_qlr = []
+
+  for value in result_QLR:
+    if value > 0:
+      results_qlr.append(1)
+    else:
+      results_qlr.append(0)
+
+  correct_qlr = 0
+
+  for result, label in zip(results_qlr, ltr):
+    if result == label:
+      correct_qlr += 1
+
+  print("number of correct predictions: ", correct_qlr, " out of ", len(results_qlr), " samples")
+  print("accuracy: ", correct_qlr / len(results_qlr))
+
+  print("#############################################")
+
+  print("Execution times:")
+  print("load: ", end_time_load - start_time_load)
+  print("pca: ", end_time_pca - start_time_pca)
+  print("lda: ", end_time_lda - start_time_lda)
+  print("mvg: ", end_time_mvg - start_time_mvg)
+  print("nbg: ", end_time_nbg - start_time_nbg)
+  print("tiedg: ", end_time_tiedg - start_time_tiedg)
+  print("lr: ", end_time_lr - start_time_lr)
+  print("qlr: ", end_time_qlr - start_time_qlr)
 
   # mean_f1 = dtr[0, :].mean()
   # print("mean_f1: ", mean_f1)
