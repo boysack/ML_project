@@ -5,8 +5,11 @@ from utils import *
 from scipy.optimize import fmin_l_bfgs_b
 
 # implementare kernel e tutto in un dictionary di funzioni
-def polynomial_kernel(X_1:np.ndarray, X_2:np.ndarray, c:float, d:float):
-  return (np.dot(X_1.T, X_2) + c) ** d
+def polynomial_kernel(X_1:np.ndarray, X_2:np.ndarray, k:float, c:float, d:float):
+  return (np.dot(X_1.T, X_2) + c) ** d + k ** 2
+
+def radial_basis_function_kernel():
+  pass
 
 class svm:
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float) -> None:
@@ -36,7 +39,7 @@ class svm:
   def train(self):
     alpha = np.zeros((self.data.shape[1], 1))
     box_const = (0, self.C)
-    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, factr=1.0, bounds=[box_const]*self.data.shape[1])
+    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, factr=1.0, bounds=[box_const] * self.data.shape[1])
     self.alpha = alpha
   
     self.is_fitted = True
@@ -77,17 +80,16 @@ class polynomial_svm(svm):
     self.d = d
 
   def H(self) -> np.ndarray:
-    kernel = polynomial_kernel(self.data, self.data, self.c, self.d)
+    kernel = polynomial_kernel(self.data, self.data, self.k, self.c, self.d)
     z = np.dot(v_col(self.z), v_row(self.z))
     return z * kernel
   
   def scores(self, X:np.ndarray):
     if(self.is_fitted is False):
       self.train()
-    return v_col(self.alpha) * v_col(self.z) * (polynomial_kernel(self.data, X, self.c, self.d) + self.k ** 2).sum(0)
+    return (v_col(self.alpha) * v_col(self.z) * polynomial_kernel(self.data, X, self.k, self.c, self.d)).sum(0)
   
 class test():
-   
   def f1(self, x:np.ndarray) -> float:
     return (x[0]+3)**2+np.sin(x[0])+(x[1]+1)**2
   
