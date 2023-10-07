@@ -4,6 +4,10 @@ from utils import *
 
 from scipy.optimize import fmin_l_bfgs_b
 
+# implementare kernel e tutto in un dictionary di funzioni
+def polynomial_kernel(X_1:np.ndarray, X_2:np.ndarray, c:float, d:float):
+  return (np.dot(X_1.T, X_2) + c) ** d
+
 class svm:
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float) -> None:
         self.data = data
@@ -19,12 +23,23 @@ class svm:
         self.is_fitted = False
   
   @abstractmethod
-  def obj():
+  def H():
     pass
 
-  @abstractmethod
-  def train():
-    pass
+  # wrapper?
+  def obj(self, alpha:np.ndarray) -> np.ndarray:
+    H_hat = self.H()
+    obj_f = .5 * np.dot(np.dot(alpha.T, H_hat), alpha) - np.dot(alpha.T, v_col(np.ones((self.data.shape[1]))))
+    gradient_f = v_col(np.dot(H_hat, alpha))-v_col(np.ones(self.data.shape[1]))
+    return obj_f, gradient_f
+  
+  def train(self):
+    alpha = np.zeros((self.data.shape[1], 1))
+    box_const = (0, self.C)
+    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, factr=1.0, bounds=[box_const]*self.data.shape[1])
+    self.alpha = alpha
+  
+    self.is_fitted = True
 
   @abstractmethod
   def scores():
@@ -36,7 +51,7 @@ class hard_svm(svm):
 
   # forse in superclasse?
   # forse si può reimplementare solo questa parte per implementare i kernel
-  def H_hat(self) -> np.ndarray:
+  def H(self) -> np.ndarray:
     X_hat = np.vstack((self.data, [self.k] * self.data.shape[1]))
     X_hat = X_hat * self.z
     return np.dot(X_hat.T, X_hat)
@@ -45,34 +60,32 @@ class hard_svm(svm):
   def alpha_to_w_b(self, alpha:np.ndarray) -> np.ndarray:
     X_hat = np.vstack((self.data, [self.k] * self.data.shape[1]))
     return np.sum((v_col(alpha) * v_col(self.z)).T * X_hat, axis=1)
-    
-  # wrapper?
-  def obj(self, alpha:np.ndarray) -> np.ndarray:
-    H_hat = self.H_hat()
-    obj_f = .5 * np.dot(np.dot(alpha.T, H_hat), alpha) - np.dot(alpha.T, v_col(np.ones((self.data.shape[1]))))
-    gradient_f = v_col(np.dot(H_hat, alpha))-v_col(np.ones(self.data.shape[1]))
-    return obj_f, gradient_f
-  
-  def train(self):
-    alpha = np.zeros((self.data.shape[1], 1))
-    box_const = (0, self.C)
-    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, factr=1.0, bounds=[box_const]*self.data.shape[1])
-    self.alpha = alpha
-    w_hat = self.alpha_to_w_b(alpha)
-    self.weights = w_hat[:-1]
-    self.bias = w_hat[-1]
 
-    self.is_fitted = True
-
+  # forse si può reimplementare solo questa parte per implementare i kernel
   def scores(self, X:np.ndarray):
     if(self.is_fitted is False):
       self.train()
-    return np.dot(self.weights.T, X) + self.bias * self.k
+    w_hat = self.alpha_to_w_b(self.alpha)
+    weights = w_hat[:-1]
+    bias = w_hat[-1]
+    return np.dot(weights.T, X) + bias * self.k
 
-class soft_svm(svm):
-  def __init__(self, data:np.ndarray, labels:np.ndarray, ):
-    pass
+class polynomial_svm(svm):
+  def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float, c:float, d:float):
+    super().__init__(data, labels, k, C)
+    self.c = c
+    self.d = d
 
+  def H(self) -> np.ndarray:
+    kernel = polynomial_kernel(self.data, self.data, self.c, self.d)
+    z = np.dot(v_col(self.z), v_row(self.z))
+    return z * kernel
+  
+  def scores(self, X:np.ndarray):
+    if(self.is_fitted is False):
+      self.train()
+    return v_col(self.alpha) * v_col(self.z) * (polynomial_kernel(self.data, X, self.c, self.d) + self.k ** 2).sum(0)
+  
 class test():
    
   def f1(self, x:np.ndarray) -> float:
