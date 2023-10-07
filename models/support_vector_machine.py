@@ -6,12 +6,12 @@ from scipy.optimize import fmin_l_bfgs_b
 
 class svm:
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float) -> None:
-        # capire se salvare direttamente col k inserito o inserirlo occasionalmente
         self.data = data
         self.labels = labels
-        self.z = 2*labels-1
         self.k = k
         self.C = C
+
+        self.z = 2*labels-1
 
         self.alpha = None
         self.weights = None
@@ -30,46 +30,46 @@ class svm:
   def scores():
     pass
 
-class soft_svm(svm):
+class hard_svm(svm):
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float):
     super().__init__(data, labels, k, C)
 
   # forse in superclasse?
-  def h_hat(self) -> np.ndarray:
-    d = np.vstack((self.data, [self.k] * self.data.shape[1]))
-    d = d * self.z
-    h_hat = np.dot(d.T, d)
-    return h_hat
+  # forse si può reimplementare solo questa parte per implementare i kernel
+  def H_hat(self) -> np.ndarray:
+    X_hat = np.vstack((self.data, [self.k] * self.data.shape[1]))
+    X_hat = X_hat * self.z
+    return np.dot(X_hat.T, X_hat)
   
   # forse in superclasse?
   def alpha_to_w_b(self, alpha:np.ndarray) -> np.ndarray:
-    d = np.vstack((self.data, [self.k] * self.data.shape[1]))
-    return np.sum((v_col(alpha) * v_col(self.z)).T * d, axis=1)
-
+    X_hat = np.vstack((self.data, [self.k] * self.data.shape[1]))
+    return np.sum((v_col(alpha) * v_col(self.z)).T * X_hat, axis=1)
+    
   # wrapper?
   def obj(self, alpha:np.ndarray) -> np.ndarray:
-    h_hat = self.h_hat()
-    obj_f = .5 * np.dot(np.dot(alpha.T, h_hat), alpha) - np.dot(alpha.T, np.diag(np.ones((self.data.shape[1],self.data.shape[1]))))
-    gradient_f = v_col(np.dot(h_hat, alpha))-v_col(np.ones(self.data.shape[1]))
-    return (obj_f, gradient_f)
+    H_hat = self.H_hat()
+    obj_f = .5 * np.dot(np.dot(alpha.T, H_hat), alpha) - np.dot(alpha.T, v_col(np.ones((self.data.shape[1]))))
+    gradient_f = v_col(np.dot(H_hat, alpha))-v_col(np.ones(self.data.shape[1]))
+    return obj_f, gradient_f
   
   def train(self):
     alpha = np.zeros((self.data.shape[1], 1))
     box_const = (0, self.C)
-    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, bounds=[box_const]*self.data.shape[1])
+    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, factr=1.0, bounds=[box_const]*self.data.shape[1])
     self.alpha = alpha
     w_hat = self.alpha_to_w_b(alpha)
     self.weights = w_hat[:-1]
     self.bias = w_hat[-1]
-    
+
     self.is_fitted = True
 
   def scores(self, X:np.ndarray):
     if(self.is_fitted is False):
       self.train()
-    return np.dot(self.weights.T, X) + self.bias
+    return np.dot(self.weights.T, X) + self.bias * self.k
 
-class hard_svm(svm):
+class soft_svm(svm):
   def __init__(self, data:np.ndarray, labels:np.ndarray, ):
     pass
 
