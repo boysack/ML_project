@@ -7,7 +7,7 @@ from scipy.optimize import fmin_l_bfgs_b
 class svm:
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float) -> None:
         # capire se salvare direttamente col k inserito o inserirlo occasionalmente
-        self.data = np.vstack((data, [k] * data.shape[1]))
+        self.data = data
         self.labels = labels
         self.z = 2*labels-1
         self.k = k
@@ -16,7 +16,6 @@ class svm:
         self.alpha = None
         self.weights = None
         self.bias = None
-        self.score_values = None
         self.is_fitted = False
   
   @abstractmethod
@@ -35,27 +34,29 @@ class soft_svm(svm):
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float):
     super().__init__(data, labels, k, C)
 
+  # forse in superclasse?
   def h_hat(self) -> np.ndarray:
     d = np.vstack((self.data, [self.k] * self.data.shape[1]))
     d = d * self.z
     h_hat = np.dot(d.T, d)
     return h_hat
+  
+  # forse in superclasse?
+  def alpha_to_w_b(self, alpha:np.ndarray) -> np.ndarray:
+    d = np.vstack((self.data, [self.k] * self.data.shape[1]))
+    return np.sum((v_col(alpha) * v_col(self.z)).T * d, axis=1)
 
+  # wrapper?
   def obj(self, alpha:np.ndarray) -> np.ndarray:
     h_hat = self.h_hat()
     obj_f = .5 * np.dot(np.dot(alpha.T, h_hat), alpha) - np.dot(alpha.T, np.diag(np.ones((self.data.shape[1],self.data.shape[1]))))
-    gradient_f = v_row(np.dot(h_hat, alpha) - np.ones((alpha.shape[0], 1)))
-    return np.array([obj_f, gradient_f])
-
-  def alpha_to_w_b(self, alpha:np.ndarray):
-    return np.sum((v_col(alpha) * v_col(self.z)).T * self.data, axis=1)
-
+    gradient_f = v_col(np.dot(h_hat, alpha))-v_col(np.ones(self.data.shape[1]))
+    return (obj_f, gradient_f)
+  
   def train(self):
     alpha = np.zeros((self.data.shape[1], 1))
     box_const = (0, self.C)
-    # implementa senza approssimare
-    alpha, _, d = fmin_l_bfgs_b(self.obj, args=(alpha), bounds=[box_const]*self.data.shape[1], factr=1.0)
-    print(d)
+    alpha, _, _ = fmin_l_bfgs_b(self.obj, alpha, bounds=[box_const]*self.data.shape[1])
     self.alpha = alpha
     w_hat = self.alpha_to_w_b(alpha)
     self.weights = w_hat[:-1]
@@ -66,12 +67,12 @@ class soft_svm(svm):
   def scores(self, X:np.ndarray):
     if(self.is_fitted is False):
       self.train()
-    
+    return np.dot(self.weights.T, X) + self.bias
 
 class hard_svm(svm):
   def __init__(self, data:np.ndarray, labels:np.ndarray, ):
     pass
-  
+
 class test():
    
   def f1(self, x:np.ndarray) -> float:
