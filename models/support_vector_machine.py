@@ -8,8 +8,12 @@ from scipy.optimize import fmin_l_bfgs_b
 def polynomial_kernel(X_1:np.ndarray, X_2:np.ndarray, k:float, c:float, d:float):
   return (np.dot(X_1.T, X_2) + c) ** d + k ** 2
 
-def radial_basis_function_kernel():
-  pass
+def radial_basis_function_kernel(X_1:np.ndarray, X_2:np.ndarray, k:float, gamma:float):
+  if(len(X_1.shape) < 2):
+    X_1 = v_col(X_1)
+  if(len(X_2.shape) < 2):
+    X_2 = v_col(X_2)
+  return np.array([np.exp(-gamma * np.linalg.norm(X_1[:,i]-X_2[:,j], axis=0) ** 2) + k ** 2 for i in range(X_1.shape[1]) for j in range(X_2.shape[1])]).reshape((X_1.shape[1], X_2.shape[1]))
 
 class svm:
   def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float) -> None:
@@ -89,6 +93,21 @@ class polynomial_svm(svm):
       self.train()
     return (v_col(self.alpha) * v_col(self.z) * polynomial_kernel(self.data, X, self.k, self.c, self.d)).sum(0)
   
+class radial_basis_function_svm(svm):
+  def __init__(self, data:np.ndarray, labels:np.ndarray, k:float, C:float, gamma:float):
+    super().__init__(data, labels, k, C)
+    self.gamma = gamma
+
+  def H(self) -> np.ndarray:
+    kernel = radial_basis_function_kernel(self.data, self.data, self.k, self.gamma)
+    z = np.dot(v_col(self.z), v_row(self.z))
+    return z * kernel
+  
+  def scores(self, X:np.ndarray):
+    if(self.is_fitted is False):
+      self.train()
+    return (v_col(self.alpha) * v_col(self.z) * radial_basis_function_kernel(self.data, X, self.k, self.gamma)).sum(0)
+
 class test():
   def f1(self, x:np.ndarray) -> float:
     return (x[0]+3)**2+np.sin(x[0])+(x[1]+1)**2
